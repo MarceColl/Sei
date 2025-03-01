@@ -5,15 +5,22 @@ import { setupCounter } from './counter.ts'
 
 const uploader = document.getElementById('image_upload');
 const json_uploader = document.getElementById('json_upload');
+const img_btn = document.getElementById('image_upload_btn');
+const json_btn = document.getElementById('json_upload_btn');
+img_btn.addEventListener('click', () => {uploader.click();})
+json_btn.addEventListener('click', () => {json_uploader.click();})
 const cvs = document.getElementById('canvas');
 const ctx = cvs.getContext('2d');
 ctx.webkitImageSmoothingEnabled = false;
 ctx.mozImageSmoothingEnabled = false;
 ctx.imageSmoothingEnabled = false;
-cvs.width = cvs.clientWidth * devicePixelRatio;
-cvs.height = cvs.clientHeight * devicePixelRatio;
-cvs.style.width = cvs.clientWidth;
-cvs.style.height = cvs.clientHeight;
+const displayWidth = cvs.clientWidth;
+const displayHeight = cvs.clientHeight;
+cvs.width = displayWidth * devicePixelRatio;
+cvs.height = displayHeight * devicePixelRatio;
+cvs.style.width = `${displayWidth}px`;
+cvs.style.height = `${displayHeight}px`;
+
 
 class Camera {
   constructor(ctx) {
@@ -82,7 +89,7 @@ class Camera {
           const prevMult = this.zoom;
           const worldMouse = this.screenToWorld(this.lastmouse);
           this.zoom += 0.1;
-          this.zoom = Math.min(this.zoom, 8);
+          this.zoom = Math.min(this.zoom, 12);
           const ratio = 1 - (prevMult / this.zoom);
           this.x += (worldMouse.x - this.x) * ratio;
           this.y += (worldMouse.y - this.y) * ratio;
@@ -90,6 +97,13 @@ class Camera {
       // }
 
       ev.preventDefault();
+    })
+
+    window.addEventListener('resize', () => {
+      cvs.width = cvs.clientWidth * devicePixelRatio;
+      cvs.height = cvs.clientHeight * devicePixelRatio;
+      cvs.style.width = cvs.clientWidth;
+      cvs.style.height = cvs.clientHeight;
     })
   }
 
@@ -245,6 +259,13 @@ class Spritesheet {
     this.sprite_size = json.spriteSize;
     this.img = new Image();
     this.img.src = json.image;
+
+    document.getElementById('offset-x').value = this.offset.x;
+    document.getElementById('offset-y').value = this.offset.y;
+    document.getElementById('sprite-x').value = this.sprite_size.x;
+    document.getElementById('sprite-y').value = this.sprite_size.y;
+    document.getElementById('padding-x').value = this.padding.x;
+    document.getElementById('padding-y').value = this.padding.y;
   }
 }
 
