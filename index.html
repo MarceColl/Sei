@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + TS</title>
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <div class="overlay">
+      <div class="controls">
+        <input type="file" id="image_upload" accept="image/*">
+        <button id="export">Export</button>
+        <input type="file" id="json_upload" accept="application/json">
+
+        <div class="settings">
+          <label>
+            Offset:
+            <input id="offset-x" type="number" min="0" max="200" value="0">
+            <input id="offset-y" type="number" min="0" max="200" value="0">
+          </label>
+          <label>
+            Sprite Size:
+            <input id="sprite-x" type="number" min="0" max="200" value="16">
+            <input id="sprite-y" type="number" min="0" max="200" value="16">
+          </label>
+          <label>
+            Padding:
+            <input id="padding-x" type="number" min="0" max="200" value="0">
+            <input id="padding-y" type="number" min="0" max="200" value="0">
+          </label>
+        </div>
+      </div>
+    </div>
+    <canvas id="canvas"></canvas>
+
+    <script type="module" src="/src/main.ts"></script>
+    <script src="./main.js"></script>
+  </body>
+</html>
