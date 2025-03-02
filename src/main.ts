@@ -6,7 +6,7 @@ import { setupCounter } from './counter.ts'
 const uploader = document.getElementById('image_upload');
 const json_uploader = document.getElementById('json_upload');
 const img_btn = document.getElementById('image_upload_btn');
-const json_btn = document.getElementById('json_upload_btn');
+const json_btn = document.getElementById('import_btn');
 img_btn.addEventListener('click', () => {uploader.click();})
 json_btn.addEventListener('click', () => {json_uploader.click();})
 const cvs = document.getElementById('canvas');
@@ -21,6 +21,8 @@ cvs.height = displayHeight * devicePixelRatio;
 cvs.style.width = `${displayWidth}px`;
 cvs.style.height = `${displayHeight}px`;
 
+const $ = (id) => document.getElementById(id);
+const ø = (id, ev, fn) => { $(id).addEventListener(ev, fn) }
 
 class Camera {
   constructor(ctx) {
@@ -160,6 +162,102 @@ class Camera {
   }
 }
 
+class Assets {
+  constructor() {
+    this.assets = {}
+    this.selectedAsset = null;
+
+    ø('import_btn', 'change', (e) => {
+      const file = e.target.files[0];
+
+      if (file) {
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+          try {
+            const jsonData = JSON.parse(event.target.result);
+            const image = new Image();
+            image.src = jsonData.image;
+            spritesheet = new Spritesheet(image);
+            spritesheet.importJson(jsonData);
+          } catch (error) {
+            console.error('Error parsing JSON:', error);
+          }
+        };
+
+        reader.onerror = function(event) {
+          console.error('Error reading file:', reader.error);
+        };
+
+        reader.readAsText(file);
+      }
+      importLibrary(e.target)
+    });
+    ø('offset-x', 'change', (e) => this.selectedAsset.offset.x = parseInt(e.target.value));
+    ø('offset-y', 'change', (e) => this.selectedAsset.offset.y = parseInt(e.target.value));
+    ø('sprite-x', 'change', (e) => this.selectedAsset.sprite_size.x = parseInt(e.target.value));
+    ø('sprite-y', 'change', (e) => this.selectedAsset.sprite_size.y = parseInt(e.target.value));
+    ø('padding-x', 'change', (e) => this.selectedAsset.padding.x = parseInt(e.target.value));
+    ø('padding-y', 'change', (e) => this.selectedAsset.padding.y = parseInt(e.target.value));
+    document.addEventListener('seiclick', (ev) => {
+      this.selectedAsset.click = {x: ev.detail.x, y: ev.detail.y};
+    })
+    ø('export', 'click', () => downloadJSON(this.exportJson()))
+  }
+
+  select(name) {
+    this.selectedAsset = this.assets[name];
+  }
+
+  addSpritesheet(img) {
+    const name = prompt("Name for the spritesheet");
+
+    if (name) {
+      const asset = new Spritesheet(img);
+      this.assets[name] = asset;
+      this.selectedAsset = this.assets[name];
+      const item = document.createElement('div');
+      item.classList.add('asset-item');
+      item.textContent = name;
+      item.id = `__asset_${name}`;
+      item.addEventListener('click', () => {
+        this.selectedAsset = asset;
+      })
+      $('assets-list').appendChild(item);
+    }
+  }
+
+  renameAsset(name, newName) {
+    this.assets[newName] = this.assets[name];
+    this.assets[name] = null;
+  }
+
+  removeAsset(name) {
+    this.assets[name] = null;
+  }
+
+  exportJson() {
+    const json = {};
+
+    for (const name in this.assets) {
+      const asset = this.assets[name];
+      json[name] = asset.exportJson();
+    }
+
+    return json;
+  }
+
+  draw(camera) {
+    this.selectedAsset?.draw(camera);
+  }
+
+  importLibrary(json) {
+
+  }
+}
+
+const assets = new Assets();
+
 let spritesheet = null;
 
 class Spritesheet {
@@ -171,17 +269,6 @@ class Spritesheet {
     this.mappings = {};
     this.names = new Set();
     this.click = null;
-
-    document.getElementById('offset-x').addEventListener('change', (ev) => {this.offset.x = parseInt(ev.target.value);});
-    document.getElementById('offset-y').addEventListener('change', (ev) => {this.offset.y = parseInt(ev.target.value);});
-    document.getElementById('sprite-x').addEventListener('change', (ev) => {this.sprite_size.x = parseInt(ev.target.value);});
-    document.getElementById('sprite-y').addEventListener('change', (ev) => {this.sprite_size.y = parseInt(ev.target.value);});
-    document.getElementById('padding-x').addEventListener('change', (ev) => {this.padding.x = parseInt(ev.target.value);});
-    document.getElementById('padding-y').addEventListener('change', (ev) => {this.padding.y = parseInt(ev.target.value);});
-    document.addEventListener('seiclick', (ev) => {
-      this.click = {x: ev.detail.x, y: ev.detail.y};
-    })
-    document.getElementById('export').addEventListener('click', (ev) => downloadJSON(this.exportJson()));
   }
 
   draw(camera) {
@@ -314,11 +401,7 @@ uploader.addEventListener('change', function(e) {
     reader.onload = function(event) {
       const img = new Image();
       img.onload = function() {
-        // Clear the canvas
-        ctx.clearRect(0, 0, cvs.width, cvs.height);
-
-        spritesheet = new Spritesheet(img);
-        window.spritesheet = spritesheet;
+        assets.addSpritesheet(img);
       };
 
       img.src = event.target.result;
@@ -361,11 +444,7 @@ json_uploader.addEventListener('change', (e) => {
 
 function tick() {
   ctx.clearRect(0, 0, cvs.width, cvs.height);
-
-  if (spritesheet) {
-    spritesheet.draw(camera);
-  }
-
+  assets.draw(camera);
   requestAnimationFrame(tick);
 }
 

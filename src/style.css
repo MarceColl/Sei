@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   --primary-pastel: #64a0a0;
   --secondary-pastel: #bc758b;
@@ -49,7 +51,6 @@ a:hover {
   padding: 10px;
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
-  max-width: 220px;
   border: 1px solid var(--secondary-pastel);
   transition: transform 0.3s ease, opacity 0.3s ease;
   font-size: 0.85em;
@@ -89,8 +90,6 @@ a:hover {
 }
 
 .controls {
-  display: flex;
-  flex-direction: column;
   gap: 16px;
   transition: opacity 0.3s ease;
 }
@@ -145,17 +144,24 @@ button {
   border-radius: 6px;
   border: none;
   padding: 0.4em 0.8em;
-  font-size: 0.85em;
-  font-weight: 600;
+  font-weight: 800;
   font-family: inherit;
-  background-color: var(--secondary-pastel);
-  color: var(--text-light);
   cursor: pointer;
   transition: all 0.25s;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  width: 100%;
   text-align: center;
   margin-bottom: 4px;
+}
+
+.asset-item {
+  border: 1px white solid;
+  padding: 1px 4px;
+}
+
+.asset-item:hover {
+  background: white;
+  color: black;
+  cursor: pointer;
 }
 
 button.image-btn {
@@ -192,18 +198,6 @@ button:focus-visible {
   left: 0;
   z-index: 1;
   background-color: transparent;
-}
-
-/* Section titles */
-.controls::before {
-  content: "Sprite Editor";
-  display: block;
-  font-size: 1em;
-  font-weight: 700;
-  color: var(--secondary-pastel);
-  margin-bottom: 8px;
-  text-align: center;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .settings::before {
